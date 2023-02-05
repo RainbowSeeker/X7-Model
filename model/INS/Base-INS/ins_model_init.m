@@ -6,7 +6,7 @@ load('ins_default_config');
 wmm = load('wmmgrid_2021.mat');
 
 %% Constant Variable (for internal use)
-INS_CONST.dt = 0.002;   % step time in s
+INS_CONST.dt = 0.005;   % step time in s
 INS_CONST.g = single(9.8055);   % gravity constant
 INS_CONST.wmm_mag = wmm.wmmgrid_mag;
 INS_CONST.wmm_dec = wmm.wmmgrid_dec;

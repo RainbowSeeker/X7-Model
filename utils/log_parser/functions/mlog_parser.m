@@ -62,14 +62,14 @@ LogHeader.num_param_group = fread(fileID, 1, 'uint8=>uint8');
 for n = 1:LogHeader.num_param_group
     LogHeader.param_group_list(n).name = fread(fileID, [1 LogHeader.max_name_len], 'uint8=>char');
     LogHeader.param_group_list(n).num_param = fread(fileID, 1, 'uint32=>uint32');
-    LogHeader.param_group_list(n).name = LogHeader.param_group_list(n).name(~isspace(LogHeader.param_group_list(n).name));
+    LogHeader.param_group_list(n).name = LogHeader.param_group_list(n).name(isdis_str(LogHeader.param_group_list(n).name));
     
     for k = 1:LogHeader.param_group_list(n).num_param
         LogHeader.param_group_list(n).param(k).name = fread(fileID, [1 LogHeader.max_name_len], 'uint8=>char');
         LogHeader.param_group_list(n).param(k).type = fread(fileID, 1, 'uint8=>uint8');
         index = LogHeader.param_group_list(n).param(k).type+1;
         LogHeader.param_group_list(n).param(k).val = fread(fileID, 1, TYPE_CAST(index));
-        LogHeader.param_group_list(n).param(k).name = LogHeader.param_group_list(n).param(k).name(~isspace(LogHeader.param_group_list(n).param(k).name));
+        LogHeader.param_group_list(n).param(k).name = LogHeader.param_group_list(n).param(k).name(isdis_str(LogHeader.param_group_list(n).param(k).name));
     end
 end
 
@@ -159,7 +159,7 @@ fprintf('\nLog parse finish!\n');
 % fprintf('log elapsed time: %f(s)\n', )
 for n = 1:LogHeader.num_bus
     BusName = strrep(LogHeader.bus(n).name, '"', '');
-    BusName = BusName(~isspace(BusName));
+    BusName = BusName(isdis_str(BusName));
 	fprintf('%s: %d msg recorded\n', BusName, MsgCount(n));
 end
 
@@ -179,13 +179,13 @@ for n = 1:LogHeader.num_bus
     end
     
     BusName = strrep(LogHeader.bus(n).name, '"', '');
-    BusName = BusName(~isspace(BusName));
+    BusName = BusName(isdis_str(BusName));
     
     % find timestamp
     timestamp_id = 0;
     for k = 1:LogHeader.bus(n).num_elem
         ElemName = strrep(LogHeader.bus(n).elem_list(k).name, '"', '');
-        ElemName = ElemName(~isspace(ElemName));
+        ElemName = ElemName(isdis_str(ElemName));
         if strcmp(ElemName, "timestamp_ms") || strcmp(ElemName, "timestamp")
             timestamp_id = k;
         end
@@ -201,7 +201,7 @@ for n = 1:LogHeader.num_bus
     % construct Bus variable
     for k = 1:LogHeader.bus(n).num_elem
         ElemName = strrep(LogHeader.bus(n).elem_list(k).name, '"', '');
-        ElemName = ElemName(~isspace(ElemName));
+        ElemName = ElemName(isdis_str(ElemName));
         
         exp = sprintf('timeseries(LogMsg{index}{k}'', time_stamp);');
         if ~isempty(ElemName)
@@ -219,3 +219,10 @@ for n = 1:LogHeader.num_bus
 end    
 end
 
+function [out] = isdis_str(string)
+    if isstring(string) || ischar(string)
+        out = logical((string > 32) .* (string < 127));
+    else
+        out = nan;
+    end
+end
